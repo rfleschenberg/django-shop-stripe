@@ -16,6 +16,7 @@ class StripeBackend(object):
     """
     backend_name = "Stripe"
     url_namespace = "stripe"
+    template = "shop_stripe/payment.html"
 
     def __init__(self, shop):
         self.shop = shop
@@ -76,7 +77,7 @@ class StripeBackend(object):
                 return redirect(self.shop.get_finished_url())
         else:
             form = CardForm()
-        return render(request, "shop_stripe/payment.html", {
+        return render(request, self.template, {
             'form': form,
             'error': error,
             'STRIPE_PUBLISHABLE_KEY': pub_key,
