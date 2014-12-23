@@ -17,6 +17,7 @@ class StripeBackend(object):
     backend_name = "Stripe"
     url_namespace = "stripe"
     template = "shop_stripe/payment.html"
+    form_class = CardForm
 
     def __init__(self, shop):
         self.shop = shop
@@ -32,6 +33,9 @@ class StripeBackend(object):
         )
         return urlpatterns
 
+    def get_form_class(self):
+        return self.form_class
+
     def stripe_payment_view(self, request):
         try:
             stripe.api_key = settings.SHOP_STRIPE_PRIVATE_KEY
@@ -42,7 +46,7 @@ class StripeBackend(object):
                 ' and SHOP_STRIPE_PUBLISHABLE_KEY settings'
             )
         if request.method == 'POST':
-            form = CardForm(request.POST)
+            form = self.get_form_class()(request.POST)
             error = None
             try:
                 card_token = request.POST['stripeToken']
@@ -76,7 +80,7 @@ class StripeBackend(object):
                 )
                 return redirect(self.shop.get_finished_url())
         else:
-            form = CardForm()
+            form = self.get_form_class()()
         return render(request, self.template, {
             'form': form,
             'error': error,
