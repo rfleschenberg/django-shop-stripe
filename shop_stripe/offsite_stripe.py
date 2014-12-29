@@ -126,34 +126,38 @@ class StripeBackend(object):
         current order using the provided Stripe token.
         """
         form_class = self.get_form_class()
-        error = None
+        order = self.shop.get_order(request)
+        order_id = self.shop.get_order_unique_id(order)
+        amount = self.shop.get_order_total(order)
+        currency = self.currency
+        context = {
+            'error': None,
+            'STRIPE_PUBLISHABLE_KEY': self.public_key,
+            'amount': amount,
+            'currency': currency,
+        }
         if request.method == 'POST':
             form = form_class(request.POST)
-            order = self.shop.get_order(request)
-            order_id = self.shop.get_order_unique_id(order)
-            amount = str(int(self.shop.get_order_total(order) * 100))
             description = self.get_description(request)
+            stripe_amount = str(int(amount) * 100)
 
             token = request.POST.get('stripeToken')
             if not token:
                 return HttpResponseBadRequest('stripeToken not set')
 
             try:
-                tx_id = self.charge_card(token, amount, description)
+                tx_id = self.charge_card(token, stripe_amount, description)
             except StripeException as e:
-                error = e
+                context['error'] = e
             else:
                 self.shop.confirm_payment(
                     self.shop.get_order_for_id(order_id),
-                    amount,
+                    stripe_amount,
                     tx_id,
                     self.backend_name
                 )
                 return redirect(self.get_success_url())
         else:
             form = form_class()
-        return render(request, self.template, {
-            'form': form,
-            'error': error,
-            'STRIPE_PUBLISHABLE_KEY': self.public_key,
-        })
+        context['form'] = form
+        return render(request, self.template, context)
