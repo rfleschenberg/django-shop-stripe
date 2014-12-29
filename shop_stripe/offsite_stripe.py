@@ -95,7 +95,7 @@ class StripeBackend(object):
            If the user is logged in, return the user's ``email`` attribute.
            Otherwise, return ``'guest_customer'`` (possibly translated).
         """
-        if request.user.is_authenticated:
+        if request.user.is_authenticated():
             return request.user.email
         return _('guest customer')
 
