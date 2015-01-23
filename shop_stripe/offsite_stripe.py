@@ -97,7 +97,7 @@ class StripeBackend(object):
         """
         if request.user.is_authenticated():
             return request.user.email
-        return _('guest customer')
+        return unicode(_('guest customer'))
 
     def charge_card(self, token, amount, description):
         """Try to charge the card identified by ``token`` using Stripe.
