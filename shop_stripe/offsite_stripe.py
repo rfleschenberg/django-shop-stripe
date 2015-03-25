@@ -139,7 +139,7 @@ class StripeBackend(object):
         if request.method == 'POST':
             form = form_class(request.POST)
             description = self.get_description(request)
-            stripe_amount = str(int(amount) * 100)
+            stripe_amount = str(int(amount * 100))
 
             token = request.POST.get('stripeToken')
             if not token:
