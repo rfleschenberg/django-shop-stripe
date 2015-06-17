@@ -131,7 +131,6 @@ class StripeBackend(object):
         amount = self.shop.get_order_total(order)
         currency = self.currency
         context = {
-            'error': None,
             'STRIPE_PUBLISHABLE_KEY': self.public_key,
             'amount': amount,
             'currency': currency,
